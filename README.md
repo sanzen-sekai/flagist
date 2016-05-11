@@ -22,15 +22,20 @@ Or install it yourself as:
 
 ## Usage
 
-初期化  
-ActiveModel::Model に flagist クラスメソッドをインクルードする
-
-気になるなら、各モデルで `include Flagist` でも良い
+初期化
 
 ```ruby
 # config/initializers/flagist.rb
 Flagist.install(ActiveRecord::Base)
 # ActiveRecord::Base.extend Flagist::ModuleMethods
+```
+
+or
+
+```ruby
+class MyModel < ActiveRecord::Base
+  include Flagist
+end
 ```
 
 フラグ設定は各モデルで行う
@@ -50,8 +55,6 @@ class MyModel < ActiveRecord::Base
 
     # フラグ名を複数形で指定すると type: :array になる
     # その場合の型は String で、値のカンマ区切りで保存される
-
-    # name が String で指定された場合、 symbol に変換される
   end
 end
 ```
@@ -268,8 +271,6 @@ MyModel.flagist
 #     },
 #   },
 # }
-# # i18n が設定されていない場合は label には name が使用される
-# # この時、 name が明示的に指定されていない場合は label は nil が使用される
 ```
 
 ## Configure
