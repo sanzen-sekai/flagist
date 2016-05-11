@@ -1,6 +1,6 @@
 # flagist
 
-flag addon to active record
+flag addon to active model
 
 ## Installation
 
@@ -21,14 +21,14 @@ Or install it yourself as:
 ## Usage
 
 初期化  
-ActiveRecord に flagist クラスメソッドをインクルードする
+ActiveModel::Model に flagist クラスメソッドをインクルードする
 
 気になるなら、各モデルで `include Flagist` でも良い
 
 ```ruby
 # config/initializers/flagist.rb
 Flagist.install
-# ActiveRecord::Base.send :include, Flagist
+# ActiveModel::Model.send :include, Flagist
 ```
 
 フラグ設定は各モデルで行う
@@ -39,18 +39,17 @@ class MyModel < ActiveRecord::Base
   flagist do |flag|
     flag.is_active true, false
 
-    flag.color 1 => :yellow, 2 => :red 3 => :green
+    flag.color nil => :blank, 1 => :yellow, 2 => :red, 3 => :green
 
     flag.roles :admin, :user, :guest
 
     # flag.フラグ ( 値, 値, 値, ... )
     # flag.フラグ ( 値 => name, ... )
 
-    # シンボルで指定した場合、以下と同義
-    # flag.フラグ ( :symbol, ... ) === flag.フラグ ( :symbol => :symbol, ... )
-
     # フラグ名を複数形で指定すると type: :array になる
     # その場合の型は String で、値のカンマ区切りで保存される
+
+    # name が String で指定された場合、 symbol に変換される
   end
 end
 ```
@@ -67,10 +66,11 @@ ja:
           true:  有効
           false: 無効
         color:
+          blank: なし
           yellow: 黄
           red:    赤
           green:  緑
-        role:
+        roles:
           admin: 管理
           user:  ユーザー
           guest: ゲスト
@@ -80,17 +80,17 @@ ja:
 
 ```ruby
 MyModel.is_active_labels #=> {true => "有効", false => "無効"}
-MyModel.is_active_names  #=> {true => "有効", false => "無効"}
+MyModel.is_active_names  #=> {true => true,   false => false}
 
-MyModel.color_labels #=> {1 => "黄",    2 => "赤", 3 => "緑"}
-MyModel.color_names  #=> {1 => :yellow, 2 => :red, 3 => :green}
+MyModel.color_labels #=> {nil => "なし", 1 => "黄",    2 => "赤", 3 => "緑"}
+MyModel.color_names  #=> {nil => :blank, 1 => :yellow, 2 => :red, 3 => :green}
 
 MyModel.roles_labels #=> {:admin => "管理", :user => "ユーザー", :guest => "ゲスト"}
-MyModel.roles_names  #=> {:admin => "管理", :user => "ユーザー", :guest => "ゲスト"}
+MyModel.roles_names  #=> {:admin => :admin, :user => :user,      :guest => :guest}
 
 
-MyModel.color_labels_inverse #=> {"黄"    => 1, "赤" => 2, "緑"   => 3}
-MyModel.color_names_inverse  #=> {:yellow => 1, :red => 2, :green => 3}
+MyModel.color_labels_inverse #=> {"なし" => nil, "黄"    => 1, "赤" => 2, "緑"   => 3}
+MyModel.color_names_inverse  #=> {:blank => nil, :yellow => 1, :red => 2, :green => 3}
 ```
 
 値の取得
@@ -102,8 +102,8 @@ MyModel.color_names_inverse  #=> {:yellow => 1, :red => 2, :green => 3}
 MyModel.is_active(true)   #=> true
 MyModel.is_active("有効") #=> true
 
-MyModel.is_active_name(true)   #=> "有効"
-MyModel.is_active_name("有効") #=> "有効"
+MyModel.is_active_name(true)   #=> true
+MyModel.is_active_name("有効") #=> true
 
 MyModel.is_active_label(true)   #=> "有効"
 MyModel.is_active_label("有効") #=> "有効"
@@ -125,8 +125,8 @@ MyModel.color_label("黄")    #=> "黄"
 MyModel.roles(:admin)       #=> :admin
 MyModel.roles("管理")       #=> :admin
 
-MyModel.roles_name(:admin)  #=> "管理"
-MyModel.roles_name("管理")  #=> "管理"
+MyModel.roles_name(:admin)  #=> :admin
+MyModel.roles_name("管理")  #=> :admin
 
 MyModel.roles_label(:admin) #=> "管理"
 MyModel.roles_label("管理") #=> "管理"
@@ -144,39 +144,6 @@ MyModel.roles_label([:admin, :user]) #=> ["管理", "ユーザー"]
 MyModel.roles_label("マネージャー") #=> raise Flagist::UnknownFlagError
 ```
 
-全設定
-
-```ruby
-MyModel.flagist
-# => {
-#   is_active: {
-#     type: :scalar,
-#     flags: {
-#       true  => {name: "有効", label: "有効"},
-#       false => {name: "無効", label: "無効"},
-#     },
-#   },
-#   color: {
-#     type: :scalar,
-#     flags: {
-#       1 => {name: :yellow, label: "黄"},
-#       2 => {name: :red,    label: "赤"},
-#       3 => {name: :green,  label: "緑"},
-#     },
-#   },
-#   roles: {
-#     type: :array,
-#     flags: {
-#       :admin => {name: :admin, label: "管理"},
-#       :user  => {name: :user,  label: "ユーザー"},
-#       :guest => {name: :guest, label: "ゲスト"},
-#     },
-#   },
-# }
-# # i18n が設定されていない場合は label には name が使用される
-# # この時、 name が明示的に指定されていない場合は label は nil が使用される
-```
-
 インスタンスメソッド  
 `type: :array` の場合、 `roles_name`, `roles_label` の戻り値は配列になる
 
@@ -186,7 +153,7 @@ MyModel.flagist
 model = MyModel.new
 
 model.is_active       #=> true
-model.is_active_name  #=> "有効"
+model.is_active_name  #=> true
 model.is_active_label #=> "有効"
 
 model.color       #=> 1
@@ -206,8 +173,8 @@ model = MyModel.new
 model.is_active(true)   #=> true
 model.is_active("有効") #=> true
 
-model.is_active_name(true)   #=> "有効"
-model.is_active_name("有効") #=> "有効"
+model.is_active_name(true)   #=> true
+model.is_active_name("有効") #=> true
 
 model.is_active_label(true)   #=> "有効"
 model.is_active_label("有効") #=> "有効"
@@ -244,9 +211,9 @@ model.roles_label([:admin, :user]) #=> ["管理", "ユーザー"]
 ```ruby
 model = MyModel.new
 
-model.is_active = true         # 値の設定
-model.is_active_name = "有効"  # name で設定
-model.is_active_label = "有効" # label で設定
+model.is_active = true
+model.is_active_name = true
+model.is_active_label = "有効"
 
 model.color = 1
 model.color_name = :yellow
@@ -267,6 +234,51 @@ model.roles_label = ["マネージャー"] #=> raise Flagist::UnknownFlagError
 
 ```ruby
 flag.is_active {type: :scalar}, true, false
+```
+
+全設定の dump
+
+```ruby
+MyModel.flagist
+# => {
+#   is_active: {
+#     type: :scalar,
+#     flags: {
+#       true  => {value: true,  name: true,  label: "有効"},
+#       false => {value: false, name: false, label: "無効"},
+#     },
+#   },
+#   color: {
+#     type: :scalar,
+#     flags: {
+#       nil => {value: nil, name: :blank,  label: "なし"},
+#       1   => {value: 1,   name: :yellow, label: "黄"},
+#       2   => {value: 2,   name: :red,    label: "赤"},
+#       3   => {value: 3,   name: :green,  label: "緑"},
+#     },
+#   },
+#   roles: {
+#     type: :array,
+#     flags: {
+#       :admin => {value: :admin, name: :admin, label: "管理"},
+#       :user  => {value: :user,  name: :user,  label: "ユーザー"},
+#       :guest => {value: :guest, name: :guest, label: "ゲスト"},
+#     },
+#   },
+# }
+# # i18n が設定されていない場合は label には name が使用される
+# # この時、 name が明示的に指定されていない場合は label は nil が使用される
+```
+
+## Configure
+
+設定可能なパラメータとデフォルト
+
+```ruby
+# config/initializers/flagist.rb
+Flagist.configure do |config|
+  config.i18n_namespace = "activerecord.flags" # I18n.translate でカラム名を取得する際の namespace
+end
 ```
 
 ## Development

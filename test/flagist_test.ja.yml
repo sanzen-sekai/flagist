@@ -1,0 +1,16 @@
+ja:
+  activerecord:
+    flags:
+      flagist_test_flagist_test_model:
+        is_active:
+          true:  有効
+          false: 無効
+        color:
+          blank:  なし
+          yellow: 黄
+          red:    赤
+          green:  緑
+        roles:
+          admin: 管理
+          user:  ユーザー
+          guest: ゲスト
