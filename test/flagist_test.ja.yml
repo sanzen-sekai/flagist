@@ -1,6 +1,6 @@
 ja:
   activerecord:
-    flags:
+    flagist:
       flagist_test_flagist_test_model:
         is_active:
           true:  有効

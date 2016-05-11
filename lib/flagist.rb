@@ -24,7 +24,7 @@ module Flagist
   extend ClassMethods
 
   configure do |config|
-    config.i18n_namespace = "activerecord.flags"
+    config.i18n_namespace = "activerecord.flagist"
   end
 
 

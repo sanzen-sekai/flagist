@@ -62,7 +62,7 @@ i18n
 # config/locales/models/my_model/ja.yml
 ja:
   activerecord:
-    flags:
+    flagist:
       my_model:
         is_active:
           true:  有効
@@ -279,7 +279,7 @@ MyModel.flagist
 ```ruby
 # config/initializers/flagist.rb
 Flagist.configure do |config|
-  config.i18n_namespace = "activerecord.flags" # I18n.translate でカラム名を取得する際の namespace
+  config.i18n_namespace = "activerecord.flagist" # I18n.translate でカラム名を取得する際の namespace
 end
 ```
 
