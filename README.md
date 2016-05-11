@@ -2,6 +2,8 @@
 
 flag addon to active model
 
+![Build Status](https://travis-ci.org/sanzen-sekai/flagist.svg?branch=master)
+
 ## Installation
 
 Add this line to your application's Gemfile:
