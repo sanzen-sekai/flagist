@@ -29,8 +29,8 @@ ActiveModel::Model に flagist クラスメソッドをインクルードする
 
 ```ruby
 # config/initializers/flagist.rb
-Flagist.install
-# ActiveModel::Model.send :include, Flagist
+Flagist.install(ActiveRecord::Base)
+# ActiveRecord::Base.extend Flagist::ModuleMethods
 ```
 
 フラグ設定は各モデルで行う
