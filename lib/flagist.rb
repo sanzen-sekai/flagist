@@ -8,8 +8,8 @@ module Flagist
   end
 
   module ClassMethods
-    def install
-      ActiveModel::Model.send :include, ::Flagist
+    def install(m)
+      included(m)
     end
 
     def configure

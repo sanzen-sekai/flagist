@@ -22,7 +22,7 @@ class FlagistTest < Minitest::Test
   end
 
   def test_it_does_install
-    ::Flagist.install
+    ::Flagist.install(ActiveModel::Model)
     assert ActiveModel::Model.respond_to?(:flagist)
   end
 
